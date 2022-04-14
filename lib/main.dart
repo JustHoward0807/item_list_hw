@@ -25,14 +25,18 @@ class HomeItemListPage extends StatefulWidget {
 class _HomeItemListPageState extends State<HomeItemListPage> {
   late List<String> itemList;
   late List<int> intList;
+
   void processData() {
     itemList = List<String>.generate(10, (i) => 'Item ${i + 1}');
     intList = List<int>.generate(10, (_) => 0);
   }
 
+  final TextEditingController _index1 = TextEditingController();
+  final TextEditingController _index2 = TextEditingController();
   final TextEditingController _indexController = TextEditingController();
   final TextEditingController _itemController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey2 = GlobalKey<FormState>();
   String? itemInput;
   int? itemIntInput;
   final _random = Random();
@@ -67,12 +71,6 @@ class _HomeItemListPageState extends State<HomeItemListPage> {
                       decoration: const InputDecoration(
                         hintText: 'Enter your Item!',
                       ),
-                      validator: (String? value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter some text';
-                        }
-                        return null;
-                      },
                     ),
                     TextFormField(
                       controller: _indexController,
@@ -82,9 +80,7 @@ class _HomeItemListPageState extends State<HomeItemListPage> {
                         hintText: 'Enter Index!',
                       ),
                       validator: (String? value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Where u wanna put?';
-                        } else if (int.parse(value) > intList.length) {
+                        if (int.parse(value!) > intList.length) {
                           return "Can only choose from 0 ~ ${intList.length}";
                         }
                         return null;
@@ -96,7 +92,9 @@ class _HomeItemListPageState extends State<HomeItemListPage> {
                         onPressed: () {
                           // Validate will return true if the form is valid, or false if
                           // the form is invalid.
-                          if (_formKey.currentState!.validate()) {
+                          if (_formKey.currentState!.validate() &&
+                              _indexController.text.isNotEmpty &&
+                              _itemController.text.isNotEmpty) {
                             // Process data.
                             // Index input
                             itemIntInput = int.parse(_indexController.text);
@@ -117,7 +115,104 @@ class _HomeItemListPageState extends State<HomeItemListPage> {
                   ],
                 ),
               ),
-              const IndexExchange(),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (_index1.text.isNotEmpty && _index2.text.isNotEmpty) {
+                      var temp = _index1.text;
+                      _index1.text = _index2.text;
+                      _index2.text = temp;
+                    } else {
+                      debugPrint("Empty");
+                    }
+                  },
+                  child: const Icon(
+                    Icons.swap_horizontal_circle_sharp,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                ),
+              ),
+              Column(
+                children: [
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    child: Form(
+                      key: _formKey2,
+                      child: Row(children: [
+                        Flexible(
+                            child: TextFormField(
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
+                          controller: _index1,
+                          decoration: const InputDecoration(
+                            hintText: 'Index 1',
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (String? value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Index1 <-> Index2';
+                            } else if (int.parse(value) > intList.length) {
+                              return "Can only choose from 0 ~ ${intList.length}";
+                            }
+                            return null;
+                          },
+                        )),
+                        Flexible(
+                            child: TextFormField(
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
+                          controller: _index2,
+                          decoration: const InputDecoration(
+                            hintText: 'Index 2',
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (String? value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Index2 <-> Index1';
+                            } else if (int.parse(value) > intList.length) {
+                              return "Can only choose from 0 ~ ${intList.length}";
+                            }
+                            return null;
+                          },
+                        )),
+                      ]),
+                    ),
+                  ),
+                  Center(
+                      child: ElevatedButton(
+                          onPressed: () {
+                            if (_formKey2.currentState!.validate()) {
+                              setState(() {
+                                // ignore: prefer_typing_uninitialized_variables
+                                var temp;
+                                int index1 = int.parse(_index1.text);
+                                int index2 = int.parse(_index2.text);
+
+                                //index1 = 0
+                                //index2 = 1
+                                //temp -> "item1"
+                                temp = itemList[index1];
+                                //"item1" = "item2"
+                                itemList[index1] = itemList[index2];
+                                //"item2" = "item1"
+                                itemList[index2] = temp;
+
+                                //!!count need to exchange too
+                                temp = intList[index1];
+                                intList[index1] = intList[index2];
+                                intList[index2] = temp;
+                                debugPrint(itemList.toString());
+                              });
+                            }
+                          },
+                          child: const Text('Exchange'))),
+                ],
+              ),
               SizedBox(
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height / 2,
@@ -144,65 +239,6 @@ class _HomeItemListPageState extends State<HomeItemListPage> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class IndexExchange extends StatefulWidget {
-  const IndexExchange({Key? key}) : super(key: key);
-
-  @override
-  State<IndexExchange> createState() => IndexExchangeState();
-}
-
-class IndexExchangeState extends State<IndexExchange> {
-  final TextEditingController _index1 = TextEditingController();
-  final TextEditingController _index2 = TextEditingController();
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(
-          width: MediaQuery.of(context).size.width,
-          child: Row(children: [
-            Flexible(
-                child: TextField(
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              controller: _index1,
-              decoration: const InputDecoration(
-                hintText: 'Index 1',
-                border: OutlineInputBorder(),
-              ),
-            )),
-            Flexible(
-                child: TextField(
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              controller: _index2,
-              decoration: const InputDecoration(
-                hintText: 'Index 2',
-                border: OutlineInputBorder(),
-              ),
-            )),
-          ]),
-        ),
-        Center(
-            child: ElevatedButton(
-                onPressed: () {
-                  String temp;
-                  setState(() {
-                    if (_index1.text.isNotEmpty && _index2.text.isNotEmpty) {
-                      temp = _index1.text;
-                      _index1.text = _index2.text;
-                      _index2.text = temp;
-                    } else {
-                      debugPrint("Empty");
-                    }
-                  });
-                },
-                child: const Text('Exchange'))),
-      ],
     );
   }
 }
