@@ -8,5 +8,11 @@ b. 每當button點擊一下，text的數字要+1
 
 ## Showcase
 
-![showcase](https://user-images.githubusercontent.com/77046944/163424452-9d8161c8-845c-4bf7-a78b-83ddf9fcd6f6.gif)
+![showcase](https://user-images.githubusercontent.com/77046944/163434055-39566f81-a871-42ed-b4a1-6544ea4589ee.gif)
+
+## Full Showcase
+
+https://user-images.githubusercontent.com/77046944/163434087-c19e3848-453f-41ad-901d-a57e19afb5fb.mp4
+
+
 
